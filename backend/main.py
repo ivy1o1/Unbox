@@ -2,6 +2,9 @@ from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
+from services.speech import transcribe_audio
+
+
 app = FastAPI(title="Unbox API")
 
 UPLOAD_DIR = Path("uploads")
@@ -40,12 +43,12 @@ async def upload_audio(file: UploadFile = File(...)):
         )
 
     file_path = UPLOAD_DIR / file.filename
-
     file_path.write_bytes(contents)
 
+    transcript = transcribe_audio(str(file_path))
+
     return {
-        "message": "Audio uploaded successfully",
+        "message": "Audio uploaded and transcribed successfully",
         "filename": file.filename,
-        "content_type": file.content_type,
-        "size": len(contents),
+        "transcript": transcript,
     }
